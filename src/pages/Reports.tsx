@@ -1,0 +1,196 @@
+import { useState } from 'react';
+import { Navigation } from '@/components/Navigation';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getStoredData, getCurrentUser } from '@/lib/mockData';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Calendar, TrendingUp, Users, AlertCircle } from 'lucide-react';
+
+const Reports = () => {
+  const data = getStoredData();
+  const user = getCurrentUser();
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
+
+  const isAdmin = user?.role === 'admin';
+  const availableGroups = isAdmin
+    ? data.careGroups
+    : data.careGroups.filter(g => g.id === user?.careGroupId);
+
+  const filteredAttendance = selectedGroupId === 'all'
+    ? data.attendance
+    : data.attendance.filter(a => a.careGroupId === selectedGroupId);
+
+  // Calculate stats
+  const totalRecords = filteredAttendance.length;
+  const presentCount = filteredAttendance.filter(a => a.status === 'present').length;
+  const absentCount = filteredAttendance.filter(a => a.status === 'absent').length;
+  const attendanceRate = totalRecords > 0 ? Math.round((presentCount / totalRecords) * 100) : 0;
+
+  // Get recent absences with reasons
+  const recentAbsences = filteredAttendance
+    .filter(a => a.status === 'absent')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 10)
+    .map(a => {
+      const member = data.members.find(m => m.id === a.memberId);
+      const group = data.careGroups.find(g => g.id === a.careGroupId);
+      return { ...a, memberName: member?.name, groupName: group?.name };
+    });
+
+  // Calculate attendance by date for chart
+  const attendanceByDate = filteredAttendance.reduce((acc, record) => {
+    if (!acc[record.date]) {
+      acc[record.date] = { date: record.date, present: 0, absent: 0 };
+    }
+    if (record.status === 'present') {
+      acc[record.date].present++;
+    } else {
+      acc[record.date].absent++;
+    }
+    return acc;
+  }, {} as Record<string, { date: string; present: number; absent: number }>);
+
+  const chartData = Object.values(attendanceByDate)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(-10);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="container mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Attendance Reports</h1>
+          <p className="text-muted-foreground">View attendance statistics and trends</p>
+        </div>
+
+        {isAdmin && (
+          <div className="mb-6">
+            <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+              <SelectTrigger className="w-full md:w-64">
+                <SelectValue placeholder="Select care group" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Groups</SelectItem>
+                {data.careGroups.map(group => (
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Total Records
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{totalRecords}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Present
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{presentCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Absent
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-destructive">{absentCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" />
+                Attendance Rate
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-primary">{attendanceRate}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Attendance Trend</CardTitle>
+              <CardDescription>Last 10 meetings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    />
+                    <YAxis />
+                    <Tooltip
+                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    />
+                    <Bar dataKey="present" stackId="a" fill="hsl(var(--primary))" />
+                    <Bar dataKey="absent" stackId="a" fill="hsl(var(--destructive))" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-12">No attendance data yet</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Absences</CardTitle>
+              <CardDescription>Members who were absent with reasons</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 max-h-[300px] overflow-y-auto">
+                {recentAbsences.length > 0 ? (
+                  recentAbsences.map(absence => (
+                    <div key={absence.id} className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-medium">{absence.memberName}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(absence.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                      {isAdmin && (
+                        <div className="text-sm text-muted-foreground mb-1">{absence.groupName}</div>
+                      )}
+                      <div className="text-sm bg-muted p-2 rounded">
+                        {absence.absenceReason}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">No absences recorded</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Reports;
