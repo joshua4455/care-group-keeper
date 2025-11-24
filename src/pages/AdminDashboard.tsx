@@ -19,7 +19,6 @@ const AdminDashboard = () => {
 
   const [newGroup, setNewGroup] = useState({
     name: '',
-    meetingDay: 'Wednesday' as CareGroup['meetingDay'],
     leaderId: '',
   });
 
@@ -58,7 +57,7 @@ const AdminDashboard = () => {
 
     saveData(updatedData);
     refreshData();
-    setNewGroup({ name: '', meetingDay: 'Wednesday', leaderId: '' });
+    setNewGroup({ name: '', leaderId: '' });
     setIsGroupDialogOpen(false);
     toast({ title: 'Success', description: 'Care group created' });
   };
@@ -171,24 +170,8 @@ const AdminDashboard = () => {
                         <Input
                           value={newGroup.name}
                           onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                          placeholder="Wednesday Evening Group"
+                          placeholder="e.g., Sunday Care Group, Monday Care Group"
                         />
-                      </div>
-                      <div>
-                        <Label>Meeting Day</Label>
-                        <Select
-                          value={newGroup.meetingDay}
-                          onValueChange={(value) => setNewGroup({ ...newGroup, meetingDay: value as CareGroup['meetingDay'] })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                              <SelectItem key={day} value={day}>{day}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
                       </div>
                       <div>
                         <Label>Assign Leader</Label>
@@ -206,6 +189,7 @@ const AdminDashboard = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                      <p className="text-sm text-muted-foreground">All groups meet on Sunday after service</p>
                       <Button onClick={handleCreateGroup} className="w-full">Create Group</Button>
                     </div>
                   </DialogContent>
@@ -221,7 +205,7 @@ const AdminDashboard = () => {
                     <div key={group.id} className="p-3 border rounded-lg">
                       <div className="font-medium">{group.name}</div>
                       <div className="text-sm text-muted-foreground mt-1">
-                        {group.meetingDay} • Leader: {leader?.name} • {memberCount} members
+                        Leader: {leader?.name} • {memberCount} members
                       </div>
                     </div>
                   );
