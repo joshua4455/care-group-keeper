@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { getStoredData, saveData, getCurrentUser, AttendanceRecord } from '@/lib/mockData';
-import { CalendarIcon, Save } from 'lucide-react';
+import { CalendarIcon, Save, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -106,14 +106,19 @@ const AttendanceMarking = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto p-6 max-w-4xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Mark Attendance</h1>
-          <p className="text-muted-foreground">{group?.name}</p>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Mark Attendance
+          </h1>
+          <p className="text-muted-foreground text-lg">{group?.name}</p>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 card-hover border-primary/20 shadow-glow">
           <CardHeader>
-            <CardTitle>Select Date</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <CalendarIcon className="w-5 h-5 text-primary" />
+              Select Date
+            </CardTitle>
             <CardDescription>Choose the meeting date for attendance</CardDescription>
           </CardHeader>
           <CardContent>
@@ -143,16 +148,19 @@ const AttendanceMarking = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-hover">
           <CardHeader>
-            <CardTitle>Member Attendance</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Users className="w-5 h-5 text-primary" />
+              Member Attendance
+            </CardTitle>
             <CardDescription>Mark present or absent for each member</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {members.map(member => {
               const memberAttendance = attendance[member.id];
               return (
-                <div key={member.id} className="p-4 border rounded-lg space-y-4">
+                <div key={member.id} className="p-5 border rounded-xl hover:border-primary/50 hover:shadow-md transition-all duration-300 space-y-4 bg-card">
                   <div>
                     <h3 className="font-semibold text-lg">{member.name}</h3>
                     <p className="text-sm text-muted-foreground">{member.phone}</p>
@@ -197,12 +205,12 @@ const AttendanceMarking = () => {
             })}
 
             <Button
-              className="w-full gap-2"
+              className="w-full gap-3 h-14 text-base shadow-glow hover:shadow-xl transition-all"
               size="lg"
               onClick={handleSubmit}
               disabled={!allMarked || hasInvalidAbsent}
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-5 h-5" />
               Save Attendance
             </Button>
           </CardContent>
