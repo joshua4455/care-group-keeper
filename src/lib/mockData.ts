@@ -17,7 +17,6 @@ export interface Member {
 export interface CareGroup {
   id: string;
   name: string;
-  meetingDay: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
   leaderId: string;
 }
 
@@ -47,8 +46,8 @@ const defaultData: AppData = {
     { id: 'leader2', name: 'Michael Brown', role: 'leader', careGroupId: 'group2' },
   ],
   careGroups: [
-    { id: 'group1', name: 'Wednesday Evening Group', meetingDay: 'Wednesday', leaderId: 'leader1' },
-    { id: 'group2', name: 'Sunday Morning Group', meetingDay: 'Sunday', leaderId: 'leader2' },
+    { id: 'group1', name: 'Sunday Care Group', leaderId: 'leader1' },
+    { id: 'group2', name: 'Monday Care Group', leaderId: 'leader2' },
   ],
   members: [
     { id: 'member1', name: 'Emma Wilson', phone: '555-0101', careGroupId: 'group1' },

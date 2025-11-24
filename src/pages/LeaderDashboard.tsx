@@ -50,7 +50,8 @@ const LeaderDashboard = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">Meeting Day</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{group?.meetingDay}</div>
+              <div className="text-2xl font-bold text-primary">Sunday</div>
+              <p className="text-xs text-muted-foreground mt-1">After service</p>
             </CardContent>
           </Card>
           <Card>
