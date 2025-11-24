@@ -59,8 +59,10 @@ const Reports = () => {
       <Navigation />
       <div className="container mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Attendance Reports</h1>
-          <p className="text-muted-foreground">View attendance statistics and trends</p>
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Attendance Reports
+          </h1>
+          <p className="text-muted-foreground text-lg">View attendance statistics and trends</p>
         </div>
 
         {isAdmin && (
@@ -81,8 +83,8 @@ const Reports = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="card-hover">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
@@ -90,10 +92,10 @@ const Reports = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{totalRecords}</div>
+              <div className="text-4xl font-bold text-foreground">{totalRecords}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="card-hover border-primary/20 shadow-glow">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="w-4 h-4" />
@@ -101,10 +103,12 @@ const Reports = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{presentCount}</div>
+              <div className="text-4xl font-bold gradient-primary bg-clip-text text-transparent">
+                {presentCount}
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="card-hover border-destructive/20">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <AlertCircle className="w-4 h-4" />
@@ -112,10 +116,10 @@ const Reports = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-destructive">{absentCount}</div>
+              <div className="text-4xl font-bold text-destructive">{absentCount}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="card-hover border-secondary/20">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" />
@@ -123,15 +127,18 @@ const Reports = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{attendanceRate}%</div>
+              <div className="text-4xl font-bold text-secondary">{attendanceRate}%</div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          <Card className="card-hover">
             <CardHeader>
-              <CardTitle>Attendance Trend</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                Attendance Trend
+              </CardTitle>
               <CardDescription>Last 10 meetings</CardDescription>
             </CardHeader>
             <CardContent>
@@ -157,16 +164,19 @@ const Reports = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover">
             <CardHeader>
-              <CardTitle>Recent Absences</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <AlertCircle className="w-5 h-5 text-destructive" />
+                Recent Absences
+              </CardTitle>
               <CardDescription>Members who were absent with reasons</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4 max-h-[300px] overflow-y-auto">
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
                 {recentAbsences.length > 0 ? (
                   recentAbsences.map(absence => (
-                    <div key={absence.id} className="p-3 border rounded-lg">
+                    <div key={absence.id} className="p-4 border rounded-xl hover:border-destructive/50 hover:bg-accent/50 transition-all duration-300 hover:shadow-md">
                       <div className="flex justify-between items-start mb-2">
                         <div className="font-medium">{absence.memberName}</div>
                         <div className="text-xs text-muted-foreground">

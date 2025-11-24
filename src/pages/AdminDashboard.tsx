@@ -113,48 +113,68 @@ const AdminDashboard = () => {
       <Navigation />
       <div className="container mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage care groups, leaders, and members</p>
+          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">Manage care groups, leaders, and members</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="card-hover border-primary/20 shadow-glow">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Care Groups</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <FolderPlus className="w-4 h-4" />
+                Care Groups
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.totalGroups}</div>
+              <div className="text-4xl font-bold gradient-primary bg-clip-text text-transparent">
+                {stats.totalGroups}
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="card-hover border-secondary/20">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Leaders</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                Leaders
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.totalLeaders}</div>
+              <div className="text-4xl font-bold text-secondary">
+                {stats.totalLeaders}
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="card-hover">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Members</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Members
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.totalMembers}</div>
+              <div className="text-4xl font-bold text-foreground">
+                {stats.totalMembers}
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
+          <Card className="card-hover">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Care Groups</CardTitle>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <FolderPlus className="w-5 h-5 text-primary" />
+                    Care Groups
+                  </CardTitle>
                   <CardDescription>Manage your care groups</CardDescription>
                 </div>
                 <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
+                    <Button size="sm" className="gap-2 shadow-glow">
                       <Plus className="w-4 h-4" />
                       Create Group
                     </Button>
@@ -197,13 +217,15 @@ const AdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {data.careGroups.map(group => {
                   const leader = data.users.find(u => u.id === group.leaderId);
                   const memberCount = data.members.filter(m => m.careGroupId === group.id).length;
                   return (
-                    <div key={group.id} className="p-3 border rounded-lg">
-                      <div className="font-medium">{group.name}</div>
+                    <div key={group.id} className="p-4 border rounded-xl hover:border-primary/50 hover:bg-accent/50 transition-all duration-300 hover:shadow-md group">
+                      <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {group.name}
+                      </div>
                       <div className="text-sm text-muted-foreground mt-1">
                         Leader: {leader?.name} • {memberCount} members
                       </div>
@@ -214,16 +236,19 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="card-hover">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Members</CardTitle>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Users className="w-5 h-5 text-primary" />
+                    Members
+                  </CardTitle>
                   <CardDescription>All care group members</CardDescription>
                 </div>
                 <Dialog open={isMemberDialogOpen} onOpenChange={setIsMemberDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" className="gap-2">
+                    <Button size="sm" className="gap-2 shadow-glow">
                       <UserPlus className="w-4 h-4" />
                       Add Member
                     </Button>
@@ -273,12 +298,14 @@ const AdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {data.members.map(member => {
                   const group = data.careGroups.find(g => g.id === member.careGroupId);
                   return (
-                    <div key={member.id} className="p-3 border rounded-lg">
-                      <div className="font-medium">{member.name}</div>
+                    <div key={member.id} className="p-4 border rounded-xl hover:border-primary/50 hover:bg-accent/50 transition-all duration-300 hover:shadow-md group">
+                      <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {member.name}
+                      </div>
                       <div className="text-sm text-muted-foreground mt-1">
                         {member.phone} • {group?.name}
                       </div>

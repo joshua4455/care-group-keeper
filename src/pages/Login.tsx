@@ -30,28 +30,30 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-accent/30 to-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <Users className="w-8 h-8 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
+      <Card className="w-full max-w-md card-hover shadow-glow border-primary/20">
+        <CardHeader className="text-center space-y-4">
+          <div className="mx-auto mb-2 w-20 h-20 gradient-primary rounded-2xl flex items-center justify-center shadow-glow animate-in zoom-in duration-500">
+            <Users className="w-10 h-10 text-white" />
           </div>
-          <CardTitle className="text-2xl">Care Group Attendance</CardTitle>
-          <CardDescription>Select your account to continue</CardDescription>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Care Group Attendance
+          </CardTitle>
+          <CardDescription className="text-base">Select your account to continue</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select User</label>
+            <label className="text-sm font-semibold">Select User</label>
             <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-              <SelectTrigger>
+              <SelectTrigger className="h-12 border-primary/20 hover:border-primary/40 transition-colors">
                 <SelectValue placeholder="Choose a user..." />
               </SelectTrigger>
               <SelectContent>
                 {data.users.map(user => (
-                  <SelectItem key={user.id} value={user.id}>
-                    <div className="flex items-center gap-2">
+                  <SelectItem key={user.id} value={user.id} className="cursor-pointer">
+                    <div className="flex items-center gap-2 py-1">
                       <UserCircle className="w-4 h-4" />
-                      <span>{user.name}</span>
+                      <span className="font-medium">{user.name}</span>
                       <span className="text-xs text-muted-foreground">
                         ({user.role})
                       </span>
@@ -62,7 +64,7 @@ const Login = () => {
             </Select>
           </div>
           <Button 
-            className="w-full" 
+            className="w-full h-12 text-base shadow-glow hover:shadow-xl transition-all" 
             onClick={handleLogin}
             disabled={!selectedUserId}
           >
