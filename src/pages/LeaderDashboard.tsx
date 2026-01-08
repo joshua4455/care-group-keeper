@@ -1,23 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getStoredData, getCurrentUser } from '@/lib/mockData';
+import { getCurrentUser } from '@/lib/session';
+import { fetchCareGroups, fetchMembersByGroup } from '@/lib/api';
 import { ClipboardCheck, Users, Calendar } from 'lucide-react';
 const LeaderDashboard = () => {
   const navigate = useNavigate();
-  const data = getStoredData();
   const user = getCurrentUser();
   if (!user || user.role !== 'leader') {
     return <div>Access denied</div>;
   }
-  const group = data.careGroups.find(g => g.id === user.careGroupId);
-  const members = data.members.filter(m => m.careGroupId === user.careGroupId);
-  const recentAttendance = data.attendance.filter(a => a.careGroupId === user.careGroupId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
-  const lastMeetingDate = recentAttendance.length > 0 ? recentAttendance[0].date : null;
-  const presentCount = recentAttendance.filter(a => a.status === 'present').length;
-  const attendanceRate = members.length > 0 ? Math.round(presentCount / members.length * 100) : 0;
+  const [groupName, setGroupName] = useState<string>('');
+  const [groupDay, setGroupDay] = useState<string>('—');
+  const [members, setMembers] = useState<any[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const gs = await fetchCareGroups();
+        const g = gs.find((gg: any) => gg.id === user.careGroupId);
+        if (g) { setGroupName(g.name); setGroupDay(g.day || '—'); }
+      } catch {}
+      try {
+        if (user.careGroupId) {
+          const ms = await fetchMembersByGroup(user.careGroupId);
+          setMembers(ms.map((m: any) => ({ id: m.id, name: m.name, phone: m.phone || '' })));
+        }
+      } catch { setMembers([]); }
+    })();
+  }, [user.careGroupId]);
+  const lastMeetingDate: string | null = null;
+  const attendanceRate = 0;
   return <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto p-6">
@@ -25,7 +39,7 @@ const LeaderDashboard = () => {
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             My Care Group
           </h1>
-          <p className="text-muted-foreground text-lg">{group?.name}</p>
+          <p className="text-muted-foreground text-lg">{groupName}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -56,7 +70,7 @@ const LeaderDashboard = () => {
             </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-secondary">Sunday</div>
+              <div className="text-3xl font-bold text-secondary">{groupDay}</div>
               <p className="text-sm text-muted-foreground mt-1">After service</p>
             </CardContent>
           </Card>

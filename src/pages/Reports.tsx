@@ -1,24 +1,65 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getStoredData, getCurrentUser } from '@/lib/mockData';
+import { getCurrentUser } from '@/lib/session';
+import { fetchCareGroups, fetchAllAttendance, fetchAllMembers } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Calendar, TrendingUp, Users, AlertCircle } from 'lucide-react';
 
 const Reports = () => {
-  const data = getStoredData();
   const user = getCurrentUser();
   const [selectedGroupId, setSelectedGroupId] = useState<string>('all');
+  const [groups, setGroups] = useState<any[]>([]);
+  const [attendance, setAttendance] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
 
   const isAdmin = user?.role === 'admin';
-  const availableGroups = isAdmin
-    ? data.careGroups
-    : data.careGroups.filter(g => g.id === user?.careGroupId);
 
-  const filteredAttendance = selectedGroupId === 'all'
-    ? data.attendance
-    : data.attendance.filter(a => a.careGroupId === selectedGroupId);
+  useEffect(() => {
+    (async () => {
+      try {
+        const gs = await fetchCareGroups();
+        setGroups(gs);
+        if (!isAdmin) {
+          setSelectedGroupId(user?.careGroupId || '');
+        }
+      } catch {
+        setGroups([]);
+      }
+      try {
+        const ats = await fetchAllAttendance();
+        setAttendance(ats);
+      } catch {
+        setAttendance([]);
+      }
+      try {
+        const ms = await fetchAllMembers();
+        setMembers(ms);
+      } catch {
+        setMembers([]);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const availableGroups = useMemo(() => {
+    return isAdmin ? groups : groups.filter(g => g.id === user?.careGroupId);
+  }, [groups, isAdmin, user?.careGroupId]);
+
+  const filteredAttendance = useMemo(() => {
+    const arr = attendance.map((a: any) => ({
+      id: a.id,
+      date: a.date,
+      status: a.status,
+      absenceReason: a.absence_reason ?? a.absenceReason,
+      memberId: a.member_id ?? a.memberId,
+      careGroupId: a.care_group_id ?? a.careGroupId,
+    }));
+    if (isAdmin && selectedGroupId === 'all') return arr;
+    const gid = isAdmin ? selectedGroupId : user?.careGroupId;
+    return arr.filter(a => a.careGroupId === gid);
+  }, [attendance, isAdmin, selectedGroupId, user?.careGroupId]);
 
   // Calculate stats
   const totalRecords = filteredAttendance.length;
@@ -32,8 +73,8 @@ const Reports = () => {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 10)
     .map(a => {
-      const member = data.members.find(m => m.id === a.memberId);
-      const group = data.careGroups.find(g => g.id === a.careGroupId);
+      const member = members.find((m: any) => m.id === (a as any).memberId);
+      const group = groups.find((g: any) => g.id === (a as any).careGroupId);
       return { ...a, memberName: member?.name, groupName: group?.name };
     });
 
@@ -73,7 +114,7 @@ const Reports = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Groups</SelectItem>
-                {data.careGroups.map(group => (
+                {availableGroups.map(group => (
                   <SelectItem key={group.id} value={group.id}>
                     {group.name}
                   </SelectItem>

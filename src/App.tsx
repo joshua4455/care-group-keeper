@@ -10,6 +10,7 @@ import LeaderDashboard from "./pages/LeaderDashboard";
 import AttendanceMarking from "./pages/AttendanceMarking";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import LeaderFollowUps from "./pages/LeaderFollowUps";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/admin/reports" element={<Reports />} />
           <Route path="/leader" element={<LeaderDashboard />} />
           <Route path="/leader/attendance" element={<AttendanceMarking />} />
+          <Route path="/leader/followups" element={<LeaderFollowUps />} />
           <Route path="/leader/reports" element={<Reports />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

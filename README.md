@@ -1,73 +1,108 @@
-# Welcome to your Lovable project
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/df7a1ad7-f729-408e-ae3b-7b6347cc9a96
+Care Group Keeper is a lightweight, client‑side React app for managing church care groups. Members are auto-assigned to a weekday care group based on their day of birth. Admins can manage leaders and members, mark attendance, import/export CSVs, and review follow-ups.
+
+Major capabilities:
+
+- Auto-assign members to a weekday group based on DOB (Sunday–Saturday)
+- Admin assigns a leader by selecting from the group’s members; a password is generated for the leader
+- Attendance marking with presets for absence reasons, 2x consecutive absence follow-ups
+- Member management: edit profile, transfer with reason logging, and merge duplicates
+- CSV import (members) and export (members, attendance, leaders)
+- Offline-friendly: queue actions (attendance, member edit, member transfer) and sync later
+- Simple, demo-only password authentication (stored locally)
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/df7a1ad7-f729-408e-ae3b-7b6347cc9a96) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
+Care Group Keeper is a lightweight, client‑side React app for managing church care groups. Members are auto-assigned to a weekday care group based on their day of birth. Admins can manage leaders and members, mark attendance, import/export CSVs, and review follow-ups.
+
+Major capabilities
+
+Auto-assign members to a weekday group based on DOB (Sunday–Saturday)
+Admin assigns a leader by selecting from the group’s members; a password is generated for the leader
+Attendance marking with presets for absence reasons, 2x consecutive absence follow-ups
+Member management: edit profile, transfer with reason logging, and merge duplicates
+CSV import (members) and export (members, attendance, leaders)
+Offline-friendly: queue actions (attendance, member edit, member transfer) and sync later
+Simple, demo-only password authentication (stored locally)
+How can I edit this code?
+There are several ways of editing your application.
+
+Use your preferred IDE
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+The only requirement is having Node.js & npm installed - install with nvm
+Steps:
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
+Edit a file directly in GitHub
+Use GitHub Codespaces
+What technologies are used for this project?
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Vite
+TypeScript
+React
+shadcn‑ui
+Tailwind CSS
+Setup and running locally
+npm i
+npm run dev
+The Vite dev server runs at http://localhost:8080 (see 
+vite.config.ts
+).
 
-## How can I deploy this project?
+Login and roles
+Default admin: Pastor John with password admin123.
+Leaders are created when the admin assigns a leader by selecting a member. A password is auto‑generated and shown in a dialog. Share it securely with the leader.
+For demo purposes, passwords are stored in localStorage.
+Core routes
+/login – select user and enter password
+/admin – admin dashboard (groups, leaders, members)
+/admin/reports – charts and statistics
+/leader – leader dashboard
+/leader/attendance – mark attendance with presets
+/leader/followups – open follow-up tasks (created after 2 consecutive absences)
+CSV import/export
+Import members (Admin → Members → Import CSV)
 
-Simply open [Lovable](https://lovable.dev/projects/df7a1ad7-f729-408e-ae3b-7b6347cc9a96) and click on Share -> Publish.
+Columns (header optional, case-insensitive): name, phone, dob
+DOB format: YYYY-MM-DD
+Duplicate handling: rows with existing phone numbers are skipped
+After import, each member is auto-assigned to a weekday group by DOB
+Export CSV (Admin → Members)
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Members: id,name,phone,dob,careGroupId
+Attendance: id,date,memberId,careGroupId,status,absenceReason
+Leaders: id,name,role,careGroupId
+Offline support and syncing
+When offline, actions are queued in localStorage and applied when online or when clicking “Retry Sync” in the navbar.
+Currently supported offline actions:
+Attendance save
+Member edit (profile)
+Member transfer (with reason logged)
+The navbar shows Online/Offline, pending count, and a Retry Sync button.
+Backup/Restore
+Backup JSON: Admin → Members → Backup JSON (download a full 
+AppData
+ snapshot)
+Restore JSON: Admin → Members → Restore JSON (import a previously exported snapshot)
+Restores run through migrations defined in 
+src/lib/mockData.ts
+.
+Data model (simplified)
+User { id, name, role: 'admin' | 'leader', careGroupId?, password? }
+CareGroup { id, name, leaderId, day } where day ∈ Sunday…Saturday and ids are sun..sat.
+Member { id, name, phone, dob, careGroupId }
+AttendanceRecord { id, date, memberId, careGroupId, status, absenceReason? }
+TransferLog { id, memberId, fromGroupId, toGroupId, reason, date }
+FollowUpTask { id, memberId, careGroupId, leaderUserId?, reason, status, createdAt, completedAt? }
+absenceReasons: string[] (presets used when marking absences)
