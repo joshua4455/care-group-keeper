@@ -131,6 +131,9 @@ const AdminDashboard = () => {
         try {
           const leaders = await listLeaders();
           setLeadersCount(leaders.length || 0);
+          const map: Record<string, any> = {};
+          leaders.forEach((u:any)=> { map[u.id] = u; });
+          setLeadersById(map);
         } catch {}
       } catch {
         // keep empty if Supabase fails
@@ -192,6 +195,8 @@ const AdminDashboard = () => {
       const pwd = Math.random().toString(36).slice(-10);
       const created = await createLeaderUser(newLeader.name, newLeader.careGroupId, pwd);
       await setCareGroupLeader(newLeader.careGroupId, created.id);
+      // reflect in UI immediately
+      setGroups((prev:any[]) => prev.map(g => g.id === newLeader.careGroupId ? { ...g, leader_id: created.id } : g));
       setGeneratedPwd(pwd);
       setGeneratedLeaderName(newLeader.name);
       setPwdDialogOpen(true);
@@ -207,6 +212,8 @@ const AdminDashboard = () => {
     try {
       if (memberIdOrNone === 'none') {
         await setCareGroupLeader(groupId, null);
+        // reflect in UI immediately
+        setGroups((prev:any[]) => prev.map(g => g.id === groupId ? { ...g, leader_id: null } : g));
         const grp = groups.find((g:any)=>g.id===groupId);
         toast({ title: 'Leader cleared', description: `Leader cleared for ${grp?.name || 'group'}` });
         return;
@@ -216,6 +223,8 @@ const AdminDashboard = () => {
       const pwd = Math.random().toString(36).slice(-10);
       const created = await createLeaderUser(member.name, groupId, pwd);
       await setCareGroupLeader(groupId, created.id);
+      // reflect in UI immediately
+      setGroups((prev:any[]) => prev.map(g => g.id === groupId ? { ...g, leader_id: created.id } : g));
       setGeneratedPwd(pwd);
       setGeneratedLeaderName(member.name);
       setPwdDialogOpen(true);
@@ -227,6 +236,7 @@ const AdminDashboard = () => {
   };
 
   const [leadersCount, setLeadersCount] = useState<number>(0);
+  const [leadersById, setLeadersById] = useState<Record<string, any>>({});
   const stats = {
     totalGroups: groups.length,
     totalMembers: membersFlat.length,
@@ -306,6 +316,7 @@ const AdminDashboard = () => {
                   const memberCount = membersInGroup.length;
                   // We cannot derive a memberId from leader user; default to none
                   const currentLeaderMemberId = 'none';
+                  const leaderUser = (group as any).leader_id ? leadersById[(group as any).leader_id] : undefined;
                   return (
                     <div key={group.id} className="p-4 border rounded-xl hover:border-primary/50 hover:bg-accent/50 transition-all duration-300 hover:shadow-md group">
                       <div className="flex items-center justify-between gap-4">
@@ -316,6 +327,9 @@ const AdminDashboard = () => {
                           <div className="text-sm text-muted-foreground mt-1">
                             {group.day ? `Day: ${group.day} • ` : ''}Members: {memberCount}
                           </div>
+                          {(group as any).leader_id && (
+                            <div className="text-xs text-muted-foreground mt-1">Current leader: {leaderUser?.name || (group as any).leader_id}</div>
+                          )}
                         </div>
                         <div className="min-w-[220px] flex items-end gap-2">
                           <div className="flex-1">
@@ -339,8 +353,8 @@ const AdminDashboard = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => handleResetLeaderPassword(group.id)}
-                            disabled={!group.leaderId}
-                            title={group.leaderId ? 'Reset leader password' : 'Assign a leader to enable reset'}
+                            disabled={!((group as any).leader_id || (group as any).leaderId)}
+                            title={((group as any).leader_id || (group as any).leaderId) ? 'Reset leader password' : 'Assign a leader to enable reset'}
                           >
                             Reset Password
                           </Button>
